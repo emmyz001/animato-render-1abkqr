@@ -3,6 +3,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
+import zlib from 'node:zlib';
 import { readJobFile, decryptFile, decryptBuffer, encryptFile } from './crypt.mjs';
 import { ffmpegBin } from './ff.mjs';
 const [, , jobDir, partsDir, outDir] = process.argv;
@@ -22,7 +23,7 @@ const pcmFiles = fs.readdirSync(jobDir).filter((n) => /^audio-\d+\.enc$/.test(n)
 const final = path.join(outDir, 'video.mp4');
 if (job.audio && pcmFiles.length) {
   const raw = path.join(outDir, 'audio.raw');
-  fs.writeFileSync(raw, Buffer.concat(pcmFiles.map((n) => decryptBuffer(fs.readFileSync(path.join(jobDir, n)), KEY))));
+  fs.writeFileSync(raw, Buffer.concat(pcmFiles.map((n) => { const d = decryptBuffer(fs.readFileSync(path.join(jobDir, n)), KEY); return job.audio.gz ? zlib.gunzipSync(d) : d; })));
   run(['-i', silent, '-f', 's16le', '-ar', String(job.audio.rate), '-ac', '1', '-i', raw, '-map', '0:v:0', '-map', '1:a:0', '-c:v', 'copy', '-c:a', 'aac', '-b:a', '160k', '-shortest', '-movflags', '+faststart', final]);
 } else {
   run(['-i', silent, '-c', 'copy', '-movflags', '+faststart', final]);

@@ -1,4 +1,4 @@
-# animato-render-pipeline v5
+# animato-render-pipeline v6
 # Made by Animato Stickman Studio. Builds the video for one job (a branch called job-<id>) and saves the encrypted video as an artifact
 # that is kept for one day. Nothing here runs unless the app starts it for a real job: there is no schedule and no retry.
 # Short on purpose: one checkout (the job branch already holds the tools and the engine), the tools are cached, no extra "plan" job.
@@ -45,7 +45,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: node_modules
-          key: render-tools-v5-${{ hashFiles('package.json') }}
+          key: render-tools-v6-${{ hashFiles('package.json') }}
       - name: Install the tools (first time only)
         if: steps.deps.outputs.cache-hit != 'true'
         run: npm install --no-audit --no-fund --loglevel=error
@@ -87,7 +87,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: node_modules
-          key: render-tools-v5-${{ hashFiles('package.json') }}
+          key: render-tools-v6-${{ hashFiles('package.json') }}
       - name: Install the tools (first time only)
         if: steps.deps.outputs.cache-hit != 'true'
         run: npm install --no-audit --no-fund --loglevel=error

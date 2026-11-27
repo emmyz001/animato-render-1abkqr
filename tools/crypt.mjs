@@ -2,6 +2,7 @@
 // The same format is written and read by the app in the browser (public/gh-render.js).
 import fs from 'node:fs';
 import crypto from 'node:crypto';
+import zlib from 'node:zlib';
 const CH = 4 * 1024 * 1024, MAGIC = Buffer.from('AGC1');
 const keyOf = (k) => Buffer.from(String(k || '').replace(/-/g, '+').replace(/_/g, '/'), 'base64');
 export function encryptFile(src, dst, key) {
@@ -25,4 +26,5 @@ export function decryptBuffer(data, key) {
   return Buffer.concat(out);
 }
 export const decryptFile = (src, dst, key) => fs.writeFileSync(dst, decryptBuffer(fs.readFileSync(src), key));
-export const readJobFile = (dir, key) => JSON.parse(decryptBuffer(fs.readFileSync(dir + '/job.enc'), key).toString('utf8'));
+export const gunzipIf = (b) => (b.length > 2 && b[0] === 0x1f && b[1] === 0x8b ? zlib.gunzipSync(b) : b);
+export const readJobFile = (dir, key) => JSON.parse(gunzipIf(decryptBuffer(fs.readFileSync(dir + '/job.enc'), key)).toString('utf8'));
